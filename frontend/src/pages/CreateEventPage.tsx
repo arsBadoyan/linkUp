@@ -11,7 +11,7 @@ const CreateEventPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [dateTime, setDateTime] = useState('');
-  const [eventType, setEventType] = useState('custom');
+  const [eventType, setEventType] = useState<'custom' | 'city' | 'business'>('custom');
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +125,7 @@ const CreateEventPage: React.FC = () => {
           <select
             className="w-full p-2 border border-gray-300 rounded-md"
             value={eventType}
-            onChange={(e) => setEventType(e.target.value)}
+            onChange={(e) => setEventType(e.target.value as 'custom' | 'city' | 'business')}
           >
             <option value="custom">Custom</option>
             <option value="city">City Exploration</option>

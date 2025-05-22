@@ -30,7 +30,7 @@ export interface EventResponse {
   event_id: string;
   user_id: string;
   user?: User;
-  status: 'pending' | 'accepted' | 'declined';
+  status: 'pending' | 'accepted' | 'rejected';
   responded_at: string;
 }
 
@@ -57,6 +57,9 @@ export interface EventsContextType {
   createEvent: (eventData: Omit<Event, 'id' | 'creator_id' | 'created_at' | 'updated_at'>) => Promise<Event>;
   updateEvent: (id: string, eventData: Partial<Event>) => Promise<Event>;
   respondToEvent: (eventId: string) => Promise<EventResponse>;
+  getEvent: (id: string) => Promise<Event>;
+  updateEventResponse: (responseId: string, data: { status: string }) => Promise<EventResponse>;
+  userEvents: Event[];
 }
 
 export interface EventFilters {
