@@ -3,12 +3,30 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from app.models.models import User, Event
+import sys
+import traceback
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('telegram_bot')
 
 load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEB_APP_URL = os.getenv("WEB_APP_URL")
 
-bot = telebot.TeleBot(BOT_TOKEN)
+# Validate essential variables
+if not BOT_TOKEN:
+    logger.error("TELEGRAM_BOT_TOKEN not set in environment variables!")
+if not WEB_APP_URL:
+    logger.error("WEB_APP_URL not set in environment variables!")
+
+try:
+    bot = telebot.TeleBot(BOT_TOKEN)
+    logger.info(f"Bot initialized with token: {BOT_TOKEN[:4]}...{BOT_TOKEN[-4:] if BOT_TOKEN else ''}")
+except Exception as e:
+    logger.error(f"Failed to initialize bot: {str(e)}")
+    bot = None
 
 def send_event_invitation(user_telegram_id: int, event_title: str, event_id: str):
     """Send invitation to a user when they are accepted to an event"""
@@ -130,5 +148,28 @@ def handle_start(message):
 
 def run_bot():
     """Run the Telegram bot"""
-    print("Starting Telegram bot...")
-    bot.polling(none_stop=True) 
+    if not bot:
+        logger.error("Cannot start bot: Bot not initialized")
+        return
+    
+    if not BOT_TOKEN:
+        logger.error("Cannot start bot: No bot token provided")
+        return
+        
+    try:
+        logger.info(f"Starting Telegram bot with token: {BOT_TOKEN[:4]}...{BOT_TOKEN[-4:] if BOT_TOKEN else ''}")
+        logger.info(f"Web App URL: {WEB_APP_URL}")
+        
+        # Log successful start
+        me = bot.get_me()
+        logger.info(f"Bot started successfully: @{me.username} (ID: {me.id})")
+        
+        # Start polling
+        bot.polling(none_stop=True)
+    except Exception as e:
+        error_msg = f"Bot polling error: {str(e)}"
+        logger.error(error_msg)
+        logger.error(traceback.format_exc())
+        # If critical error, we might want to restart the bot
+        # This will be caught by the thread, and it will restart the function
+        raise Exception(error_msg) 

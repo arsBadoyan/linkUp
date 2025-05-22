@@ -41,6 +41,18 @@ app.include_router(users.router)
 app.include_router(events.router)
 app.include_router(responses.router)
 
+# Bot thread
+bot_thread = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Start the Telegram bot when the FastAPI server starts"""
+    global bot_thread
+    print("Starting Telegram bot via startup event...")
+    bot_thread = threading.Thread(target=run_bot)
+    bot_thread.daemon = True
+    bot_thread.start()
+
 @app.get("/")
 def read_root():
     return {
@@ -53,11 +65,6 @@ def start_bot():
     run_bot()
 
 if __name__ == "__main__":
-    # Start Telegram bot in a separate thread
-    bot_thread = threading.Thread(target=start_bot)
-    bot_thread.daemon = True
-    bot_thread.start()
-    
     # Start FastAPI server
     uvicorn.run(
         "app.main:app",
