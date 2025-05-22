@@ -12,7 +12,10 @@ const EventsPage: React.FC = () => {
   
   // Fetch events on initial load
   useEffect(() => {
-    fetchEvents();
+    console.log('EventsPage: Fetching events on initial load');
+    fetchEvents().catch(err => {
+      console.error('EventsPage: Error fetching events:', err);
+    });
   }, [fetchEvents]);
 
   // Handle response to an event

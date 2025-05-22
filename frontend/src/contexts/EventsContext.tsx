@@ -47,8 +47,6 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     try {
       // Build query parameters
       const params = new URLSearchParams();
-      // Добавляем user_id как обязательный параметр
-      params.append('user_id', user.id);
       
       // Добавляем фильтры, если они переданы
       if (filters) {
@@ -60,13 +58,31 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
         }
       }
       
-      const queryParams = `?${params.toString()}`;
+      // Формируем строку запроса только если есть параметры
+      const queryString = params.toString();
+      const queryParams = queryString ? `?${queryString}` : '';
+      
+      console.log(`Fetching events with URL: ${API_URL}/events${queryParams}`);
       
       const response = await axios.get(`${API_URL}/events${queryParams}`);
+      console.log('Events fetched successfully:', response.data);
       setEvents(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch events error:', error);
-      setError('Failed to load events. Please try again later.');
+      // Выводим более подробную информацию об ошибке
+      if (error.response) {
+        // Ответ получен, но со статусом ошибки
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        setError(`Failed to load events: ${error.response.status} ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        // Запрос отправлен, но ответ не получен
+        console.error('Error request:', error.request);
+        setError('Failed to load events: No response from server');
+      } else {
+        // Что-то еще пошло не так
+        setError(`Failed to load events: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -78,10 +94,20 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setLoading(true);
     
     try {
-      const response = await axios.get(`${API_URL}/events/user/${user.id}?user_id=${user.id}`);
+      console.log(`Fetching user events: ${API_URL}/events/user/${user.id}`);
+      const response = await axios.get(`${API_URL}/events/user/${user.id}`);
+      console.log('User events fetched successfully:', response.data);
       setUserEvents(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch user events error:', error);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -94,11 +120,22 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      const response = await axios.get(`${API_URL}/events/${id}?user_id=${user.id}`);
+      // Не передаем user_id, так как бэкенд его не требует
+      console.log(`Fetching event details: ${API_URL}/events/${id}`);
+      const response = await axios.get(`${API_URL}/events/${id}`);
+      console.log('Event details fetched successfully:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get event error:', error);
-      setError('Failed to load event details. Please try again later.');
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        setError(`Failed to load event details: ${error.response.status} ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        setError('Failed to load event details: No response from server');
+      } else {
+        setError(`Failed to load event details: ${error.message}`);
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -164,15 +201,24 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Sending response to event: ${API_URL}/responses, event_id=${eventId}`);
       const response = await axios.post(`${API_URL}/responses`, {
         event_id: eventId,
-        user_id: user.id
+        user_id: user.id  // Здесь user_id необходим в теле запроса
       });
-      
+      console.log('Response sent successfully:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Respond to event error:', error);
-      setError('Failed to respond to event. Please try again later.');
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        setError(`Failed to respond to event: ${error.response.status} ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        setError('Failed to respond to event: No response from server');
+      } else {
+        setError(`Failed to respond to event: ${error.message}`);
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -186,15 +232,24 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Updating response: ${API_URL}/responses/${responseId}`);
       const response = await axios.put(`${API_URL}/responses/${responseId}`, {
         ...data,
-        user_id: user.id
+        user_id: user.id  // user_id необходим в теле запроса
       });
-      
+      console.log('Response updated successfully:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update response error:', error);
-      setError('Failed to update response. Please try again later.');
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        setError(`Failed to update response: ${error.response.status} ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        setError('Failed to update response: No response from server');
+      } else {
+        setError(`Failed to update response: ${error.message}`);
+      }
       throw error;
     } finally {
       setLoading(false);
