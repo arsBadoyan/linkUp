@@ -16,7 +16,7 @@ const EventsPage: React.FC = () => {
     fetchEvents().catch(err => {
       console.error('EventsPage: Error fetching events:', err);
     });
-  }, [fetchEvents]);
+  }, []);
 
   // Handle response to an event
   const handleRespond = async (eventId: string) => {
