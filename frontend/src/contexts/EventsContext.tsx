@@ -110,7 +110,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     try {
       const response = await axios.post(`${API_URL}/events`, {
         ...eventData,
-        user_id: user.id
+        creator_id: user.id
       });
       
       const newEvent = response.data;
@@ -135,7 +135,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     try {
       const response = await axios.put(`${API_URL}/events/${id}`, {
         ...eventData,
-        user_id: user.id
+        creator_id: user.id
       });
       
       const updatedEvent = response.data;
