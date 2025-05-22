@@ -18,7 +18,19 @@ interface AuthProviderProps {
 
 // API URL from environment variable
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const IS_DEV_MODE = import.meta.env.DEV || !window.Telegram?.WebApp;
+
+// Безопасная проверка наличия Telegram WebApp API
+const isTelegramWebAppAvailable = (): boolean => {
+  try {
+    return typeof window !== 'undefined' && 
+           typeof window.Telegram !== 'undefined' && 
+           typeof window.Telegram.WebApp !== 'undefined';
+  } catch (e) {
+    return false;
+  }
+};
+
+const IS_DEV_MODE = import.meta.env.DEV || !isTelegramWebAppAvailable();
 
 // Mock user data for development
 const MOCK_USER: User = {
@@ -58,8 +70,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
       
-      // Get user data from Telegram WebApp
-      const initData = WebApp.initData;
+      // Get user data from Telegram WebApp (safely)
+      let initData = '';
+      try {
+        if (isTelegramWebAppAvailable()) {
+          initData = window.Telegram?.WebApp?.initData || '';
+        }
+      } catch (e) {
+        console.warn('Error accessing Telegram WebApp:', e);
+      }
       
       // If no initData available even in production, fallback to mock data
       if (!initData || initData === '') {
