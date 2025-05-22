@@ -1,26 +1,31 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+from app.routers import users, events, responses
+from app.database import engine
+from app.models.models import Base
+from app.services.telegram_bot import run_bot
 import threading
-from sqlalchemy.orm import Session
-from ..app.database import get_db, engine
-from ..models.models import Base
-from ..routers import users, events, responses
-from ..services import telegram_bot
+import os
+from dotenv import load_dotenv
 
-# Create the database tables
+# Load environment variables
+load_dotenv()
+
+# Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Initialize FastAPI app
 app = FastAPI(
     title="LinkUp API",
-    description="API for the LinkUp Telegram Web App",
-    version="0.1.0"
+    description="API for LinkUp - Telegram Web App for organizing events and meetings",
+    version="1.0.0"
 )
 
 # Configure CORS
 origins = [
-    "http://localhost:5173",  # Vite dev server
-    "http://localhost:4173",  # Vite preview
-    "*"  # Allow all origins in development
+    os.getenv("FRONTEND_URL", "http://localhost:5173"),  # Default frontend URL
+    "https://linkup-frontend.up.railway.app",  # Production frontend URL
 ]
 
 app.add_middleware(
@@ -36,17 +41,27 @@ app.include_router(users.router)
 app.include_router(events.router)
 app.include_router(responses.router)
 
-@app.on_event("startup")
-def startup_event():
-    # Start the Telegram bot in a separate thread
-    bot_thread = threading.Thread(target=telegram_bot.run_bot)
+@app.get("/")
+def read_root():
+    return {
+        "message": "Welcome to LinkUp API",
+        "docs": "/docs",
+        "redoc": "/redoc"
+    }
+
+def start_bot():
+    run_bot()
+
+if __name__ == "__main__":
+    # Start Telegram bot in a separate thread
+    bot_thread = threading.Thread(target=start_bot)
     bot_thread.daemon = True
     bot_thread.start()
-
-@app.get("/", tags=["root"])
-def read_root():
-    return {"message": "Welcome to the LinkUp API"}
-
-@app.get("/health", tags=["health"])
-def health_check():
-    return {"status": "healthy"} 
+    
+    # Start FastAPI server
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8000)),
+        reload=True
+    ) 
