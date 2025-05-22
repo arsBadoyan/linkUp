@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime as dt
 from sqlalchemy import Column, String, Boolean, ForeignKey, ARRAY, DateTime, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
@@ -17,8 +17,8 @@ class User(Base):
     bio = Column(String, nullable=True)
     interests = Column(ARRAY(String), nullable=False, default=list)
     photos = Column(ARRAY(String), nullable=False, default=list)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=dt.utcnow)
+    updated_at = Column(DateTime, default=dt.utcnow, onupdate=dt.utcnow)
     
     events = relationship("Event", back_populates="creator")
     responses = relationship("EventResponse", back_populates="user")
@@ -35,8 +35,8 @@ class Event(Base):
     datetime = Column(DateTime, nullable=False)
     is_open = Column(Boolean, default=True)
     type = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=dt.utcnow)
+    updated_at = Column(DateTime, default=dt.utcnow, onupdate=dt.utcnow)
     
     creator = relationship("User", back_populates="events")
     responses = relationship("EventResponse", back_populates="event")
@@ -48,7 +48,7 @@ class EventResponse(Base):
     event_id = Column(UUID(as_uuid=True), ForeignKey("events.id"), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     status = Column(String, nullable=False, default="pending")
-    responded_at = Column(DateTime, default=datetime.utcnow)
+    responded_at = Column(DateTime, default=dt.utcnow)
     
     event = relationship("Event", back_populates="responses")
     user = relationship("User", back_populates="responses")
@@ -59,6 +59,6 @@ class Badge(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     badge_type = Column(String, nullable=False)
-    awarded_at = Column(DateTime, default=datetime.utcnow)
+    awarded_at = Column(DateTime, default=dt.utcnow)
     
     user = relationship("User", back_populates="badges") 
