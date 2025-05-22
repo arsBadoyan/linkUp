@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview --port $PORT"
+    "preview": "vite preview --port $PORT",
+    "start": "node server.js"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -18,7 +19,9 @@
     "postcss": "^8.4.31",
     "autoprefixer": "^10.4.16",
     "@twa-dev/sdk": "^6.9.0",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "express": "^4.18.2",
+    "compression": "^1.7.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
