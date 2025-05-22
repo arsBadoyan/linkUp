@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from ..app.database import get_db
-from ..models.models import EventResponse, Event, User
-from ..schemas.schemas import EventResponseCreate, EventResponseOut, EventResponseUpdate
+from app.database import get_db
+from app.models.models import EventResponse, Event, User
+from app.schemas.schemas import EventResponseCreate, EventResponseOut, EventResponseUpdate
 
 router = APIRouter(
     prefix="/responses",

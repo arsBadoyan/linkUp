@@ -4,9 +4,9 @@ from typing import List
 import hashlib
 import hmac
 import time
-from ..app.database import get_db
-from ..models.models import User
-from ..schemas.schemas import UserCreate, UserResponse, UserUpdate, TelegramAuth
+from app.database import get_db
+from app.models.models import User
+from app.schemas.schemas import UserCreate, UserResponse, UserUpdate, TelegramAuth
 import os
 from dotenv import load_dotenv
 

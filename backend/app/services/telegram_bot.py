@@ -2,7 +2,7 @@ import telebot
 import os
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from ..models.models import User, Event
+from app.models.models import User, Event
 
 load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
