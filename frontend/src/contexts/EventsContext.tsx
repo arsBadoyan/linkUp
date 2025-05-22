@@ -46,17 +46,21 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     
     try {
       // Build query parameters
-      let queryParams = '';
+      const params = new URLSearchParams();
+      // Добавляем user_id как обязательный параметр
+      params.append('user_id', user.id);
+      
+      // Добавляем фильтры, если они переданы
       if (filters) {
-        const params = new URLSearchParams();
         if (filters.type) params.append('event_type', filters.type);
         if (filters.location) params.append('location', filters.location);
         if (filters.date) {
           // Convert date string to proper format if needed
           params.append('date', filters.date);
         }
-        queryParams = `?${params.toString()}`;
       }
+      
+      const queryParams = `?${params.toString()}`;
       
       const response = await axios.get(`${API_URL}/events${queryParams}`);
       setEvents(response.data);
@@ -74,7 +78,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setLoading(true);
     
     try {
-      const response = await axios.get(`${API_URL}/events/user/${user.id}`);
+      const response = await axios.get(`${API_URL}/events/user/${user.id}?user_id=${user.id}`);
       setUserEvents(response.data);
     } catch (error) {
       console.error('Fetch user events error:', error);
@@ -90,7 +94,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      const response = await axios.get(`${API_URL}/events/${id}`);
+      const response = await axios.get(`${API_URL}/events/${id}?user_id=${user.id}`);
       return response.data;
     } catch (error) {
       console.error('Get event error:', error);
