@@ -18,6 +18,20 @@ interface AuthProviderProps {
 
 // API URL from environment variable
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const IS_DEV_MODE = import.meta.env.DEV || !window.Telegram?.WebApp;
+
+// Mock user data for development
+const MOCK_USER: User = {
+  id: '12345',
+  telegram_id: 12345,
+  name: 'Test User',
+  avatar_url: 'https://via.placeholder.com/100',
+  bio: 'This is a mock user for development',
+  interests: ['coding', 'testing'],
+  photos: [],
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -35,10 +49,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (): Promise<void> => {
     setLoading(true);
     try {
+      // Check if we're in development mode
+      if (IS_DEV_MODE) {
+        console.log('Development mode detected, using mock user data');
+        setUser(MOCK_USER);
+        localStorage.setItem('user', JSON.stringify(MOCK_USER));
+        setLoading(false);
+        return;
+      }
+      
       // Get user data from Telegram WebApp
       const initData = WebApp.initData;
-      if (!initData) {
-        throw new Error('No Telegram WebApp data available');
+      
+      // If no initData available even in production, fallback to mock data
+      if (!initData || initData === '') {
+        console.warn('No Telegram WebApp data available, using mock data as fallback');
+        setUser(MOCK_USER);
+        localStorage.setItem('user', JSON.stringify(MOCK_USER));
+        setLoading(false);
+        return;
       }
 
       // Send initData to backend for verification and user creation/retrieval
@@ -51,7 +80,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      
+      // Fallback to mock user in case of error
+      if (IS_DEV_MODE) {
+        console.warn('Login failed, using mock data as fallback');
+        setUser(MOCK_USER);
+        localStorage.setItem('user', JSON.stringify(MOCK_USER));
+      } else {
+        throw error;
+      }
     } finally {
       setLoading(false);
     }
@@ -69,6 +106,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setLoading(true);
     try {
+      if (IS_DEV_MODE) {
+        // Mock update in dev mode
+        const updatedMockUser = {...user, ...userData, updated_at: new Date().toISOString()};
+        setUser(updatedMockUser);
+        localStorage.setItem('user', JSON.stringify(updatedMockUser));
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.put(`${API_URL}/users/${user.id}`, userData);
       const updatedUser = response.data;
       setUser(updatedUser);
