@@ -1,7 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../contexts/EventsContext';
-import WebApp from '@twa-dev/sdk';
+// Импортируем безопасные утилиты
+import { safeShowPopup } from '../../safe-telegram-webapp';
+
+// Безопасная проверка наличия Telegram WebApp API
+const isTelegramWebAppAvailable = (): boolean => {
+  try {
+    return typeof window !== 'undefined' && 
+           typeof window.Telegram !== 'undefined' && 
+           typeof window.Telegram.WebApp !== 'undefined';
+  } catch (e) {
+    return false;
+  }
+};
+
+// Безопасный вызов showPopup
+const safeShowPopup = (params: {
+  title?: string;
+  message: string;
+  buttons?: Array<{ id?: string; type?: string; text?: string }>;
+}) => {
+  if (isTelegramWebAppAvailable()) {
+    try {
+      window.Telegram?.WebApp?.showPopup(params);
+    } catch (e) {
+      console.warn('Error showing popup:', e);
+      // Запасной вариант - показать через alert
+      alert(`${params.title || 'Message'}: ${params.message}`);
+    }
+  } else {
+    alert(`${params.title || 'Message'}: ${params.message}`);
+  }
+};
 
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +61,7 @@ const CreateEventPage: React.FC = () => {
         is_open: true
       });
       
-      WebApp.showPopup({
+      safeShowPopup({
         title: 'Success',
         message: 'Your event has been created!',
         buttons: [{ type: 'ok' }]
@@ -40,7 +71,7 @@ const CreateEventPage: React.FC = () => {
       navigate('/events');
     } catch (error) {
       console.error('Error creating event:', error);
-      WebApp.showPopup({
+      safeShowPopup({
         title: 'Error',
         message: 'Failed to create event. Please try again.',
         buttons: [{ type: 'ok' }]
@@ -49,83 +80,58 @@ const CreateEventPage: React.FC = () => {
   };
   
   return (
-    <div className="p-4">
-      <div className="flex items-center mb-6">
-        <button 
-          className="mr-3 text-blue-500"
-          onClick={() => navigate('/events')}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1 className="text-2xl font-bold">Create Event</h1>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-4">
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Event Title*
-          </label>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Create New Event</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Title</label>
           <input
             type="text"
-            required
-            className="w-full p-2 border border-gray-300 rounded-md"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="What's your event about?"
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description*
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Description</label>
           <textarea
-            required
-            className="w-full p-2 border border-gray-300 rounded-md"
-            rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Tell people more about your event..."
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Location*
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Location</label>
           <input
             type="text"
-            required
-            className="w-full p-2 border border-gray-300 rounded-md"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="Where is it happening?"
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date and Time*
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date & Time</label>
           <input
             type="datetime-local"
-            required
-            className="w-full p-2 border border-gray-300 rounded-md"
             value={dateTime}
             onChange={(e) => setDateTime(e.target.value)}
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Event Type
-          </label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Event Type</label>
           <select
-            className="w-full p-2 border border-gray-300 rounded-md"
             value={eventType}
             onChange={(e) => setEventType(e.target.value as 'custom' | 'city' | 'business')}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="custom">Custom</option>
             <option value="city">City Exploration</option>
@@ -133,15 +139,15 @@ const CreateEventPage: React.FC = () => {
           </select>
         </div>
         
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-        >
-          {loading ? 'Creating...' : 'Create Event'}
-        </button>
+        <div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            {loading ? 'Creating...' : 'Create Event'}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import WebApp from '@twa-dev/sdk';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { EventsProvider } from './contexts/EventsContext';
+import { safeReady, safeMainButton } from '../safe-telegram-webapp';
 
 // Pages
 import EventsPage from './pages/EventsPage';
@@ -38,14 +38,14 @@ const AppContent: React.FC = () => {
   
   useEffect(() => {
     // Initialize Telegram Web App
-    WebApp.ready();
+    safeReady();
     
     // Configure main button if needed
-    WebApp.MainButton.hide();
+    safeMainButton.hide();
     
     // Clean up on unmount
     return () => {
-      WebApp.MainButton.hide();
+      safeMainButton.hide();
     };
   }, []);
   
@@ -98,6 +98,7 @@ const AppContent: React.FC = () => {
   );
 };
 
+// Wrap App content with Auth Provider
 const App: React.FC = () => {
   return (
     <Router>
