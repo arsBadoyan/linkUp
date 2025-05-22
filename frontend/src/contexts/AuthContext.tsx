@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import axios from 'axios';
 import { User, AuthContextType } from '../types';
-import WebApp from '@twa-dev/sdk';
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({

@@ -4,36 +4,6 @@ import { useEvents } from '../contexts/EventsContext';
 // Импортируем безопасные утилиты
 import { safeShowPopup } from '../../safe-telegram-webapp';
 
-// Безопасная проверка наличия Telegram WebApp API
-const isTelegramWebAppAvailable = (): boolean => {
-  try {
-    return typeof window !== 'undefined' && 
-           typeof window.Telegram !== 'undefined' && 
-           typeof window.Telegram.WebApp !== 'undefined';
-  } catch (e) {
-    return false;
-  }
-};
-
-// Безопасный вызов showPopup
-const safeShowPopup = (params: {
-  title?: string;
-  message: string;
-  buttons?: Array<{ id?: string; type?: string; text?: string }>;
-}) => {
-  if (isTelegramWebAppAvailable()) {
-    try {
-      window.Telegram?.WebApp?.showPopup(params);
-    } catch (e) {
-      console.warn('Error showing popup:', e);
-      // Запасной вариант - показать через alert
-      alert(`${params.title || 'Message'}: ${params.message}`);
-    }
-  } else {
-    alert(`${params.title || 'Message'}: ${params.message}`);
-  }
-};
-
 const CreateEventPage: React.FC = () => {
   const navigate = useNavigate();
   const { createEvent, loading } = useEvents();
@@ -64,7 +34,7 @@ const CreateEventPage: React.FC = () => {
       safeShowPopup({
         title: 'Success',
         message: 'Your event has been created!',
-        buttons: [{ type: 'ok' }]
+        buttons: [{ type: 'ok', text: 'OK' }]
       });
       
       // Navigate back to events list
@@ -74,7 +44,7 @@ const CreateEventPage: React.FC = () => {
       safeShowPopup({
         title: 'Error',
         message: 'Failed to create event. Please try again.',
-        buttons: [{ type: 'ok' }]
+        buttons: [{ type: 'ok', text: 'OK' }]
       });
     }
   };

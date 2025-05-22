@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEvents } from '../contexts/EventsContext';
 import { EventFilters } from '../types';
 import EventCard from '../components/EventCard';
-import WebApp from '@twa-dev/sdk';
+import { safeShowPopup } from '../../safe-telegram-webapp';
 
 const EventsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,17 +19,17 @@ const EventsPage: React.FC = () => {
   const handleRespond = async (eventId: string) => {
     try {
       await respondToEvent(eventId);
-      WebApp.showPopup({
+      safeShowPopup({
         title: 'Response Sent',
         message: 'Your response has been sent to the event creator. You will be notified if accepted.',
-        buttons: [{ type: 'ok' }]
+        buttons: [{ type: 'ok', text: 'OK' }]
       });
     } catch (error) {
       console.error('Error responding to event:', error);
-      WebApp.showPopup({
+      safeShowPopup({
         title: 'Error',
         message: 'Failed to respond to the event. Please try again.',
-        buttons: [{ type: 'ok' }]
+        buttons: [{ type: 'ok', text: 'OK' }]
       });
     }
   };
