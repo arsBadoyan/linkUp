@@ -16,7 +16,7 @@ const EditEventPage: React.FC = () => {
     description: '',
     location: '',
     datetime: '',
-    type: 'custom',
+    type: 'custom' as 'custom' | 'city' | 'business',
     is_open: true
   });
 
@@ -63,7 +63,11 @@ const EditEventPage: React.FC = () => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: type === 'checkbox' 
+        ? (e.target as HTMLInputElement).checked 
+        : name === 'type' 
+          ? (value as 'custom' | 'city' | 'business') 
+          : value
     }));
   };
 
