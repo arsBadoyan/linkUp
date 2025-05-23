@@ -21,12 +21,22 @@ interface EventsProviderProps {
   children: ReactNode;
 }
 
-// API URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL;
+// API URL from environment variable with fallback
+const getApiUrl = () => {
+  // В production используем production backend URL
+  if (import.meta.env.PROD) {
+    return 'https://linkup-production-4d6a.up.railway.app';
+  }
+  
+  // В dev режиме проверяем переменную окружения или используем localhost
+  try {
+    return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  } catch (e) {
+    return 'http://localhost:8000';
+  }
+};
 
-if (!API_URL) {
-  throw new Error('VITE_API_URL is not defined');
-}
+const API_URL = getApiUrl();
 
 export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
   const [events, setEvents] = useState<Event[]>([]);
