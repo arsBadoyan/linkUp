@@ -271,3 +271,13 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(test_user)
         return test_user 
+
+@router.get("/debug/environment")
+def debug_environment():
+    """Временный endpoint для отладки переменных окружения"""
+    return {
+        "DEBUG_MODE": DEBUG_MODE,
+        "DEBUG_MODE_env": os.getenv("DEBUG_MODE", "not set"),
+        "BOT_TOKEN_exists": bool(BOT_TOKEN),
+        "python_version": "3.x"
+    } 

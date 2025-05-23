@@ -47,6 +47,7 @@ export interface AuthContextType {
   login: () => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => Promise<void>;
+  forceReauth: () => Promise<void>;
 }
 
 export interface EventsContextType {

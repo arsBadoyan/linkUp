@@ -9,6 +9,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   updateUser: async () => {},
+  forceReauth: async () => {},
 });
 
 interface AuthProviderProps {
@@ -72,11 +73,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (): Promise<void> => {
     setLoading(true);
     try {
+      // Принудительно очищаем кеш для тестирования новой авторизации
+      if (window.location.search.includes('clearCache')) {
+        localStorage.clear();
+        console.log('Cache cleared for testing');
+      }
+      
       // Get user data from Telegram WebApp (safely)
       let initData = '';
       try {
         if (isTelegramWebAppAvailable()) {
           initData = window.Telegram?.WebApp?.initData || '';
+          console.log('Telegram WebApp initData length:', initData.length);
+          console.log('Telegram WebApp initData first 100 chars:', initData.substring(0, 100));
         }
       } catch (e) {
         console.warn('Error accessing Telegram WebApp:', e);
@@ -102,11 +111,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Send initData to backend for verification and user creation/retrieval
+      console.log('Sending initData to backend for authentication...');
       const response = await axios.post(`${API_URL}/users/auth`, {
         initData
       });
 
       const userData = response.data;
+      console.log('Received user data from backend:', userData);
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
@@ -154,8 +165,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const forceReauth = async (): Promise<void> => {
+    console.log('Forcing re-authentication...');
+    localStorage.clear();
+    setUser(null);
+    await login();
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser, forceReauth }}>
       {children}
     </AuthContext.Provider>
   );
