@@ -25,7 +25,10 @@ app = FastAPI(
 # Configure CORS
 origins = [
     os.getenv("FRONTEND_URL", "http://localhost:5173"),  # Default frontend URL
-    "https://linkup-frontend.up.railway.app",  # Production frontend URL
+    "https://linkup-frontend.up.railway.app",  # Old frontend URL  
+    "https://linkup-frontend-production.up.railway.app",  # Correct production frontend URL
+    "http://localhost:5173",  # Local development
+    "http://127.0.0.1:5173",  # Local development alternative
 ]
 
 app.add_middleware(
