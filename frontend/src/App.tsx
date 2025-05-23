@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { EventsProvider } from './contexts/EventsContext';
 import { safeReady, safeMainButton } from '../safe-telegram-webapp';
 import BottomNavigation from './components/BottomNavigation';
+import DebugPanel from './components/DebugPanel';
 
 // Pages
 import EventsPage from './pages/EventsPage';
@@ -53,6 +54,9 @@ const AppContent: React.FC = () => {
   return (
     <EventsProvider>
       <div className="bg-gray-100 min-h-screen pb-16">
+        {/* Debug Panel - показываем только если в URL есть ?debug=true */}
+        {window.location.search.includes('debug=true') && <DebugPanel />}
+        
         <Routes>
           <Route path="/auth" element={user ? <Navigate to="/events" /> : <AuthPage />} />
           
