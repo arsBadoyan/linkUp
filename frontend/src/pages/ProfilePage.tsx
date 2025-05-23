@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import BackButton from '../components/BackButton';
 
 const ProfilePage: React.FC = () => {
   const { user, updateUser } = useAuth();
@@ -40,6 +41,12 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
+      {/* Header with back button */}
+      <div className="flex items-center mb-6">
+        <BackButton to="/events" className="mr-4" />
+        <h1 className="text-2xl font-bold">Profile</h1>
+      </div>
+
       <div className="bg-white rounded-lg shadow-md p-6">
         {editing ? (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -98,7 +105,7 @@ const ProfilePage: React.FC = () => {
         ) : (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold">{user.name}</h1>
+              <h2 className="text-xl font-bold">{user.name}</h2>
               <button
                 onClick={() => setEditing(true)}
                 className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-500"
@@ -119,14 +126,14 @@ const ProfilePage: React.FC = () => {
 
             {user.bio && (
               <div className="mb-6">
-                <h2 className="text-sm font-semibold text-gray-500">About</h2>
+                <h3 className="text-sm font-semibold text-gray-500">About</h3>
                 <p className="mt-2 text-gray-700 whitespace-pre-wrap">{user.bio}</p>
               </div>
             )}
 
             {user.interests.length > 0 && (
               <div className="mb-6">
-                <h2 className="text-sm font-semibold text-gray-500">Interests</h2>
+                <h3 className="text-sm font-semibold text-gray-500">Interests</h3>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {user.interests.map((interest, index) => (
                     <span
@@ -142,7 +149,7 @@ const ProfilePage: React.FC = () => {
 
             {user.photos.length > 0 && (
               <div>
-                <h2 className="text-sm font-semibold text-gray-500 mb-2">Photos</h2>
+                <h3 className="text-sm font-semibold text-gray-500 mb-2">Photos</h3>
                 <div className="grid grid-cols-3 gap-4">
                   {user.photos.map((photo, index) => (
                     <img

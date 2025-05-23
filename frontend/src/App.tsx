@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { EventsProvider } from './contexts/EventsContext';
 import { safeReady, safeMainButton } from '../safe-telegram-webapp';
+import BottomNavigation from './components/BottomNavigation';
 
 // Pages
 import EventsPage from './pages/EventsPage';
@@ -51,7 +52,7 @@ const AppContent: React.FC = () => {
   
   return (
     <EventsProvider>
-      <div className="bg-gray-100 min-h-screen">
+      <div className="bg-gray-100 min-h-screen pb-16">
         <Routes>
           <Route path="/auth" element={user ? <Navigate to="/events" /> : <AuthPage />} />
           
@@ -93,12 +94,15 @@ const AppContent: React.FC = () => {
           
           <Route path="*" element={<Navigate to="/events" />} />
         </Routes>
+        
+        {user && (
+          <BottomNavigation />
+        )}
       </div>
     </EventsProvider>
   );
 };
 
-// Wrap App content with Auth Provider
 const App: React.FC = () => {
   return (
     <Router>
