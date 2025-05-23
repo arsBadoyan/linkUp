@@ -23,8 +23,14 @@ interface EventsProviderProps {
 
 // API URL from environment variable with fallback
 const getApiUrl = () => {
+  // Проверяем несколько признаков production окружения
+  const isProduction = import.meta.env.PROD || 
+                      import.meta.env.MODE === 'production' ||
+                      window.location.protocol === 'https:' ||
+                      window.location.hostname.includes('railway.app');
+  
   // В production используем правильный production backend URL
-  if (import.meta.env.PROD) {
+  if (isProduction) {
     return 'https://linkup-backend-production.up.railway.app';
   }
   

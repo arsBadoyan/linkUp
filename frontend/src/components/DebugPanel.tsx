@@ -10,11 +10,49 @@ const DebugPanel: React.FC = () => {
   const telegramRaw = (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) || null;
   const initData = telegramRaw?.initData || 'Not available';
 
+  // API URL logic (same as in contexts)
+  const getApiUrl = () => {
+    // Проверяем несколько признаков production окружения
+    const isProduction = import.meta.env.PROD || 
+                        import.meta.env.MODE === 'production' ||
+                        window.location.protocol === 'https:' ||
+                        window.location.hostname.includes('railway.app');
+    
+    if (isProduction) {
+      return 'https://linkup-backend-production.up.railway.app';
+    }
+    
+    try {
+      return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    } catch (e) {
+      return 'http://localhost:8000';
+    }
+  };
+
+  const apiUrl = getApiUrl();
+  const isProduction = import.meta.env.PROD || 
+                      import.meta.env.MODE === 'production' ||
+                      window.location.protocol === 'https:' ||
+                      window.location.hostname.includes('railway.app');
+
   if (!debugEnabled) return null;
 
   return (
     <div style={{ background: '#f4f4f4', padding: '1rem', margin: '1rem 0', borderRadius: 8 }}>
       <h3>🔍 Debug Panel</h3>
+
+      <p><strong>Environment:</strong></p>
+      <pre style={{ background: '#fff', padding: 10, borderRadius: 4 }}>
+        PROD: {String(import.meta.env.PROD)}
+        DEV: {String(import.meta.env.DEV)}
+        MODE: {import.meta.env.MODE}
+        VITE_API_URL: {import.meta.env.VITE_API_URL || 'not set'}
+        Is Production: {String(isProduction)}
+        Protocol: {window.location.protocol}
+        Hostname: {window.location.hostname}
+      </pre>
+
+      <p><strong>API URL:</strong> <span style={{color: apiUrl.startsWith('https') ? 'green' : 'red'}}>{apiUrl}</span></p>
 
       <p><strong>Telegram Available:</strong> {telegramRaw ? '✅ Yes' : '❌ No'}</p>
       <p><strong>initData length:</strong> {initData.length || 0}</p>
