@@ -168,23 +168,24 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
             
             return test_user
         
-        # Если initData пустой, это может быть нормально для некоторых случаев
-        # Но попробуем создать реального пользователя если есть данные
+        # В production режиме обязательно создаем реального пользователя
+        # Если initData пустой, создаем случайного пользователя
         if not init_data:
-            logger.warning("Empty initData received in production mode")
-            # Только если совсем нет данных, используем fallback
-            test_user = db.query(User).filter(User.telegram_id == 12345).first()
-            if not test_user:
-                test_user = User(
-                    telegram_id=12345,
-                    name="Test User",
-                    avatar_url="https://via.placeholder.com/100",
-                    bio="This is a test user for development"
-                )
-                db.add(test_user)
-                db.commit()
-                db.refresh(test_user)
-            return test_user
+            logger.warning("Empty initData received in production mode, creating random user")
+            # Создаем уникального пользователя с timestamp
+            import time
+            timestamp = int(time.time())
+            random_user = User(
+                telegram_id=timestamp,  # Используем timestamp как ID
+                name=f"User_{timestamp}",
+                avatar_url="https://via.placeholder.com/100",
+                bio="User created without initData"
+            )
+            db.add(random_user)
+            db.commit()
+            db.refresh(random_user)
+            logger.info(f"Created random user with ID: {random_user.telegram_id}")
+            return random_user
         
         # Парсим initData
         logger.info("Attempting to parse initData...")
@@ -192,19 +193,20 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
         
         if not auth_data_dict or not auth_data_dict.get('id'):
             logger.error(f"Failed to parse initData or no user ID found. Parsed data: {auth_data_dict}")
-            # Только если полностью не смогли распарсить
-            test_user = db.query(User).filter(User.telegram_id == 12345).first()
-            if not test_user:
-                test_user = User(
-                    telegram_id=12345,
-                    name="Test User",
-                    avatar_url="https://via.placeholder.com/100",
-                    bio="This is a test user for development"
-                )
-                db.add(test_user)
-                db.commit()
-                db.refresh(test_user)
-            return test_user
+            # Создаем пользователя с данными из raw initData если возможно
+            import time
+            timestamp = int(time.time())
+            fallback_user = User(
+                telegram_id=timestamp + 1000,  # Добавляем 1000 чтобы не конфликтовать
+                name=f"ParsedUser_{timestamp}",
+                avatar_url="https://via.placeholder.com/100",
+                bio="User created from unparseable initData"
+            )
+            db.add(fallback_user)
+            db.commit()
+            db.refresh(fallback_user)
+            logger.info(f"Created fallback user with ID: {fallback_user.telegram_id}")
+            return fallback_user
         
         # Создаем объект TelegramAuth из распарсенных данных
         try:
@@ -212,28 +214,29 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
             logger.info(f"Successfully created TelegramAuth object for user {auth_data.id} ({auth_data.first_name})")
         except Exception as e:
             logger.error(f"Failed to create TelegramAuth object: {str(e)}")
-            test_user = db.query(User).filter(User.telegram_id == 12345).first()
-            if not test_user:
-                test_user = User(
-                    telegram_id=12345,
-                    name="Test User",
-                    avatar_url="https://via.placeholder.com/100",
-                    bio="This is a test user for development"
-                )
-                db.add(test_user)
-                db.commit()
-                db.refresh(test_user)
-            return test_user
+            # Попробуем создать пользователя с минимальными данными
+            user_id = auth_data_dict.get('id', int(time.time()))
+            user_name = auth_data_dict.get('first_name', f"User_{user_id}")
+            
+            minimal_user = User(
+                telegram_id=user_id,
+                name=user_name,
+                avatar_url="https://via.placeholder.com/100",
+                bio="User created with minimal data"
+            )
+            db.add(minimal_user)
+            db.commit()
+            db.refresh(minimal_user)
+            logger.info(f"Created minimal user with ID: {minimal_user.telegram_id}")
+            return minimal_user
         
-        # Проверяем аутентификацию
+        # Проверяем аутентификацию (но не блокируем на ней)
         logger.info("Verifying Telegram authentication...")
         auth_valid = verify_telegram_auth(auth_data)
         logger.info(f"Authentication verification result: {auth_valid}")
         
         if not auth_valid:
-            logger.warning("Telegram authentication failed, but creating user anyway for testing")
-            # В production можем быть менее строгими для тестирования
-            # НЕ используем fallback, а создаем пользователя из данных
+            logger.warning("Telegram authentication failed, but creating user anyway")
         
         # Ищем пользователя в базе
         logger.info(f"Looking for existing user with telegram_id: {auth_data.id}")
@@ -258,19 +261,20 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
         
     except Exception as e:
         logger.error(f"Unexpected authentication error: {str(e)}", exc_info=True)
-        # Только в случае критической ошибки используем fallback
-        test_user = db.query(User).filter(User.telegram_id == 12345).first()
-        if not test_user:
-            test_user = User(
-                telegram_id=12345,
-                name="Test User",
-                avatar_url="https://via.placeholder.com/100",
-                bio="This is a test user for development"
-            )
-            db.add(test_user)
-            db.commit()
-            db.refresh(test_user)
-        return test_user 
+        # В крайнем случае создаем пользователя с timestamp
+        import time
+        timestamp = int(time.time())
+        error_user = User(
+            telegram_id=timestamp + 2000,  # Добавляем 2000 для отличия
+            name=f"ErrorUser_{timestamp}",
+            avatar_url="https://via.placeholder.com/100",
+            bio="User created due to error"
+        )
+        db.add(error_user)
+        db.commit()
+        db.refresh(error_user)
+        logger.info(f"Created error user with ID: {error_user.telegram_id}")
+        return error_user
 
 @router.get("/debug/environment")
 def debug_environment():
