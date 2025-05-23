@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useEvents } from '../contexts/EventsContext';
-import { Event, EventResponse, User } from '../types';
+import { Event } from '../types';
 import BackButton from '../components/BackButton';
 
 const EventResponsesPage: React.FC = () => {
