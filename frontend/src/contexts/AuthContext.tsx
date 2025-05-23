@@ -68,17 +68,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('Error accessing Telegram WebApp:', e);
       }
       
-      // If no initData available, check if we should use dev mode
+      // If no initData available, check what to do
       if (!initData || initData === '') {
-        if (import.meta.env.DEV && !isTelegramWebAppAvailable()) {
-          console.log('Development mode detected without Telegram WebApp, using mock user data');
+        if (import.meta.env.DEV) {
+          // В dev режиме всегда используем mock данные если нет Telegram данных
+          console.log('Development mode: no Telegram WebApp data, using mock user data');
           setUser(MOCK_USER);
           localStorage.setItem('user', JSON.stringify(MOCK_USER));
           setLoading(false);
           return;
         } else {
-          console.warn('No Telegram WebApp data available');
           // В production режиме без initData выдаем ошибку
+          console.warn('Production mode: No Telegram WebApp data available');
           throw new Error('Telegram WebApp data is required for authentication');
         }
       }
@@ -94,9 +95,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Login error:', error);
       
-      // Fallback to mock user only in dev mode without Telegram WebApp
-      if (import.meta.env.DEV && !isTelegramWebAppAvailable()) {
-        console.warn('Login failed, using mock data as fallback');
+      // Fallback to mock user only in dev mode
+      if (import.meta.env.DEV) {
+        console.warn('Login failed in dev mode, using mock data as fallback');
         setUser(MOCK_USER);
         localStorage.setItem('user', JSON.stringify(MOCK_USER));
       } else {
@@ -119,8 +120,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setLoading(true);
     try {
-      if (import.meta.env.DEV && !isTelegramWebAppAvailable()) {
-        // Mock update in dev mode
+      if (import.meta.env.DEV) {
+        // В dev режиме используем mock обновление
         const updatedMockUser = {...user, ...userData, updated_at: new Date().toISOString()};
         setUser(updatedMockUser);
         localStorage.setItem('user', JSON.stringify(updatedMockUser));
