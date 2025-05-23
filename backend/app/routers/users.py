@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-# Устанавливаем DEBUG_MODE в True по умолчанию для облегчения разработки
-DEBUG_MODE = os.getenv("DEBUG_MODE", "True").lower() in ("true", "1", "t")
+# Изменяем DEBUG_MODE на False по умолчанию для использования реальной авторизации
+DEBUG_MODE = os.getenv("DEBUG_MODE", "False").lower() in ("true", "1", "t")
 
 router = APIRouter(
     prefix="/users",

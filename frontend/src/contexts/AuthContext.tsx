@@ -29,8 +29,6 @@ const isTelegramWebAppAvailable = (): boolean => {
   }
 };
 
-const IS_DEV_MODE = import.meta.env.DEV || !isTelegramWebAppAvailable();
-
 // Mock user data for development
 const MOCK_USER: User = {
   id: '12345',
@@ -60,15 +58,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (): Promise<void> => {
     setLoading(true);
     try {
-      // Check if we're in development mode
-      if (IS_DEV_MODE) {
-        console.log('Development mode detected, using mock user data');
-        setUser(MOCK_USER);
-        localStorage.setItem('user', JSON.stringify(MOCK_USER));
-        setLoading(false);
-        return;
-      }
-      
       // Get user data from Telegram WebApp (safely)
       let initData = '';
       try {
@@ -79,13 +68,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('Error accessing Telegram WebApp:', e);
       }
       
-      // If no initData available even in production, fallback to mock data
+      // If no initData available, check if we should use dev mode
       if (!initData || initData === '') {
-        console.warn('No Telegram WebApp data available, using mock data as fallback');
-        setUser(MOCK_USER);
-        localStorage.setItem('user', JSON.stringify(MOCK_USER));
-        setLoading(false);
-        return;
+        if (import.meta.env.DEV && !isTelegramWebAppAvailable()) {
+          console.log('Development mode detected without Telegram WebApp, using mock user data');
+          setUser(MOCK_USER);
+          localStorage.setItem('user', JSON.stringify(MOCK_USER));
+          setLoading(false);
+          return;
+        } else {
+          console.warn('No Telegram WebApp data available');
+          // В production режиме без initData выдаем ошибку
+          throw new Error('Telegram WebApp data is required for authentication');
+        }
       }
 
       // Send initData to backend for verification and user creation/retrieval
@@ -99,8 +94,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Login error:', error);
       
-      // Fallback to mock user in case of error
-      if (IS_DEV_MODE) {
+      // Fallback to mock user only in dev mode without Telegram WebApp
+      if (import.meta.env.DEV && !isTelegramWebAppAvailable()) {
         console.warn('Login failed, using mock data as fallback');
         setUser(MOCK_USER);
         localStorage.setItem('user', JSON.stringify(MOCK_USER));
@@ -124,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setLoading(true);
     try {
-      if (IS_DEV_MODE) {
+      if (import.meta.env.DEV && !isTelegramWebAppAvailable()) {
         // Mock update in dev mode
         const updatedMockUser = {...user, ...userData, updated_at: new Date().toISOString()};
         setUser(updatedMockUser);
