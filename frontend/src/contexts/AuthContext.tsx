@@ -17,9 +17,9 @@ interface AuthProviderProps {
 
 // API URL from environment variable with fallback
 const getApiUrl = () => {
-  // В production используем production backend URL
+  // В production используем правильный production backend URL
   if (import.meta.env.PROD) {
-    return 'https://linkup-production-4d6a.up.railway.app';
+    return 'https://linkup-backend-production.up.railway.app';
   }
   
   // В dev режиме проверяем переменную окружения или используем localhost
