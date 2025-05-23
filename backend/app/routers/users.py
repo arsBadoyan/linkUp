@@ -12,6 +12,7 @@ from app.schemas.schemas import UserCreate, UserResponse, UserUpdate, TelegramAu
 import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from urllib.parse import unquote
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -55,15 +56,22 @@ def verify_telegram_auth(auth_data: TelegramAuth) -> bool:
 # Парсер данных из Telegram initData
 def parse_init_data(init_data_str: str) -> Dict[str, Any]:
     try:
+        # URL декодирование
+        init_data_str = unquote(init_data_str)
+        
         # Разбираем строку параметров запроса
         params = {}
         for param in init_data_str.split('&'):
             if '=' in param:
                 key, value = param.split('=', 1)
-                params[key] = value
+                # Дополнительное декодирование для значений
+                params[key] = unquote(value)
 
+        logger.info(f"Parsed params: {params}")
+        
         # Создаем соответствующий объект auth_data
         user_data = json.loads(params.get('user', '{}'))
+        logger.info(f"Parsed user_data: {user_data}")
         
         auth_data = {
             'id': int(user_data.get('id', 0)),
@@ -74,6 +82,7 @@ def parse_init_data(init_data_str: str) -> Dict[str, Any]:
             'hash': params.get('hash', '')
         }
         
+        logger.info(f"Created auth_data: {auth_data}")
         return auth_data
     except Exception as e:
         logger.error(f"Error parsing init data: {str(e)}")
