@@ -4,21 +4,24 @@ import { useAuth } from '../contexts/AuthContext';
 const DebugPanel: React.FC = () => {
   const { user, forceReauth } = useAuth();
 
-  const telegramAvailable = typeof window !== 'undefined' &&
-    typeof window.Telegram !== 'undefined' &&
-    typeof window.Telegram.WebApp !== 'undefined';
+  const searchParams = new URLSearchParams(window.location.search);
+  const debugEnabled = searchParams.get('debug') === 'true';
 
-  const initData = telegramAvailable ? (window.Telegram?.WebApp?.initData || '') : 'Telegram WebApp not available';
+  const telegramRaw = (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) || null;
+  const initData = telegramRaw?.initData || 'Not available';
+
+  if (!debugEnabled) return null;
 
   return (
     <div style={{ background: '#f4f4f4', padding: '1rem', margin: '1rem 0', borderRadius: 8 }}>
       <h3>🔍 Debug Panel</h3>
 
-      <p><strong>Telegram Available:</strong> {telegramAvailable ? '✅ Yes' : '❌ No'}</p>
-
+      <p><strong>Telegram Available:</strong> {telegramRaw ? '✅ Yes' : '❌ No'}</p>
       <p><strong>initData length:</strong> {initData.length || 0}</p>
+
+      <p><strong>initData:</strong></p>
       <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 200, overflowY: 'auto', background: '#fff', padding: 10, borderRadius: 4 }}>
-        {initData || 'No initData'}
+        {initData}
       </pre>
 
       <p><strong>User object:</strong></p>
@@ -41,7 +44,7 @@ const DebugPanel: React.FC = () => {
         >
           🔄 Force Re-auth
         </button>
-        
+
         <button 
           onClick={() => {
             localStorage.clear();
@@ -63,4 +66,4 @@ const DebugPanel: React.FC = () => {
   );
 };
 
-export default DebugPanel; 
+export default DebugPanel;
