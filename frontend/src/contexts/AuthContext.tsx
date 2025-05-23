@@ -91,26 +91,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('Error accessing Telegram WebApp:', e);
       }
       
-      // If no initData available, check what to do
-      if (!initData || initData === '') {
-        if (import.meta.env.DEV) {
-          // В dev режиме всегда используем mock данные если нет Telegram данных
-          console.log('Development mode: no Telegram WebApp data, using mock user data');
-          setUser(MOCK_USER);
-          localStorage.setItem('user', JSON.stringify(MOCK_USER));
-          setLoading(false);
-          return;
-        } else {
-          // В production режиме тоже используем fallback для тестирования
-          console.warn('Production mode: No Telegram WebApp data available, using fallback');
-          setUser(MOCK_USER);
-          localStorage.setItem('user', JSON.stringify(MOCK_USER));
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Send initData to backend for verification and user creation/retrieval
+      // ВСЕГДА отправляем запрос на backend, даже с пустым initData
+      // Backend сам решит что делать и создаст пользователя в БД
       console.log('Sending initData to backend for authentication...');
       const response = await axios.post(`${API_URL}/users/auth`, {
         initData
@@ -123,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Login error:', error);
       
-      // Всегда используем fallback к mock user в случае ошибки
+      // Только в случае ошибки используем fallback к mock user
       console.warn('Authentication failed, using mock data as fallback');
       setUser(MOCK_USER);
       localStorage.setItem('user', JSON.stringify(MOCK_USER));
