@@ -50,6 +50,7 @@ const AppContent: React.FC = () => {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       const version = Date.now();
       console.log('🔄 Cache buster version:', version);
+      // Force Railway deploy - timestamp: 2025-05-24T11:39:00Z
     }
     
     // Clean up on unmount
