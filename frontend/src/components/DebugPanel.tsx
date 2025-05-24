@@ -122,10 +122,50 @@ const DebugPanel: React.FC = () => {
             border: 'none', 
             padding: '0.5rem 1rem', 
             borderRadius: 4, 
-            cursor: 'pointer'
+            cursor: 'pointer',
+            marginRight: '0.5rem'
           }}
         >
           🔄 Hard Refresh
+        </button>
+        
+        <button 
+          onClick={async () => {
+            try {
+              const apiUrl = getApiUrl();
+              const response = await fetch(`${apiUrl}/users/auth`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  initData: '',
+                  createNewUser: true
+                })
+              });
+              
+              if (response.ok) {
+                const newUser = await response.json();
+                console.log('Created new test user:', newUser);
+                localStorage.setItem('user', JSON.stringify(newUser));
+                window.location.reload();
+              } else {
+                console.error('Failed to create new user');
+              }
+            } catch (error) {
+              console.error('Error creating new user:', error);
+            }
+          }}
+          style={{ 
+            background: '#17a2b8', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.5rem 1rem', 
+            borderRadius: 4, 
+            cursor: 'pointer'
+          }}
+        >
+          👤 Create New Test User
         </button>
       </div>
     </div>
