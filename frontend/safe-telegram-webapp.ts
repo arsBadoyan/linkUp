@@ -76,14 +76,33 @@ export const safeShowPopup = (params: {
 }, callback?: (buttonId: string) => void): void => {
   if (isTelegramWebAppAvailable()) {
     try {
-      window.Telegram?.WebApp?.showPopup(params, callback);
+      // Проверяем поддерживается ли showPopup
+      if (window.Telegram?.WebApp?.showPopup) {
+        window.Telegram.WebApp.showPopup(params, callback);
+      } else {
+        // Fallback для старых версий - используем showAlert
+        const message = params.title ? `${params.title}: ${params.message}` : params.message;
+        if (window.Telegram?.WebApp?.showAlert) {
+          window.Telegram.WebApp.showAlert(message, () => {
+            if (callback) callback('ok');
+          });
+        } else {
+          // Последний fallback - обычный alert
+          alert(message);
+          if (callback) callback('ok');
+        }
+      }
     } catch (e) {
       console.warn('Error showing popup:', e);
       // Запасной вариант - показать через alert
-      alert(`${params.title ? params.title + ': ' : ''}${params.message}`);
+      const message = params.title ? `${params.title}: ${params.message}` : params.message;
+      alert(message);
+      if (callback) callback('ok');
     }
   } else {
-    alert(`${params.title ? params.title + ': ' : ''}${params.message}`);
+    const message = params.title ? `${params.title}: ${params.message}` : params.message;
+    alert(message);
+    if (callback) callback('ok');
   }
 };
 

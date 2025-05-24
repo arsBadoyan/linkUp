@@ -7,6 +7,8 @@ from app.models.models import Event, User, EventResponse as EventResponseModel
 from app.schemas.schemas import EventCreate, EventResponse, EventUpdate
 import logging
 
+# Updated: 2025-05-24T12:00:00Z - Force Railway deploy for Query parameter fix
+
 router = APIRouter(
     prefix="/events",
     tags=["events"]
