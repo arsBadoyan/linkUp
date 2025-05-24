@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       const version = Date.now();
       console.log('🔄 Cache buster version:', version);
-      // Force Railway deploy - timestamp: 2025-05-24T11:39:00Z
+      // Force Railway deploy - timestamp: 2025-05-24T11:45:00Z - DEPLOY_NOW
       
       // Super aggressive cache busting for Telegram
       const WebApp = window.Telegram.WebApp;
