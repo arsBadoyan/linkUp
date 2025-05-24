@@ -51,6 +51,23 @@ const AppContent: React.FC = () => {
       const version = Date.now();
       console.log('🔄 Cache buster version:', version);
       // Force Railway deploy - timestamp: 2025-05-24T11:39:00Z
+      
+      // Super aggressive cache busting for Telegram
+      const WebApp = window.Telegram.WebApp;
+      if (WebApp) {
+        WebApp.ready();
+        // Force version update
+        console.log('📱 Telegram WebApp initialized');
+        // Try to force cache invalidation
+        const currentUrl = window.location.href;
+        const separator = currentUrl.includes('?') ? '&' : '?';
+        const cacheParam = `_t=${version}&_cb=${Math.random().toString(36).substr(2, 9)}`;
+        if (!currentUrl.includes('_t=')) {
+          console.log('🚀 Forcing cache refresh...');
+          const newUrl = `${currentUrl}${separator}${cacheParam}`;
+          history.replaceState(null, '', newUrl);
+        }
+      }
     }
     
     // Clean up on unmount
