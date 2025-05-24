@@ -159,12 +159,11 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
         logger.info(f"Authentication request. DEBUG_MODE: {DEBUG_MODE}, initData length: {len(init_data)}")
         logger.info(f"Received initData first 50 chars: {init_data[:50]}...")
         
-        # Если DEBUG_MODE включен, создаем уникального тестового пользователя
-        if DEBUG_MODE:
-            logger.info("DEBUG_MODE is True, checking for or creating unique test user")
-            
-            # Проверяем есть ли параметр для создания нового пользователя
-            create_new = body.get('createNewUser', False)
+        # Если DEBUG_MODE включен ИЛИ передан параметр createNewUser, создаем уникального тестового пользователя
+        create_new = body.get('createNewUser', False)
+        
+        if DEBUG_MODE or create_new:
+            logger.info("Creating test user (DEBUG_MODE or createNewUser=true)")
             
             if create_new:
                 # Создаем нового уникального пользователя
@@ -185,8 +184,8 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
                 db.refresh(new_user)
                 logger.info(f"Created new test user with telegram_id: {unique_telegram_id}")
                 return new_user
-            else:
-                # Возвращаем существующего тестового пользователя
+            elif DEBUG_MODE:
+                # Возвращаем существующего тестового пользователя только в DEBUG_MODE
                 test_user = db.query(User).filter(User.telegram_id == 12345).first()
                 
                 if not test_user:
