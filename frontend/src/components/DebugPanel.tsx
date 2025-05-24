@@ -44,6 +44,7 @@ const DebugPanel: React.FC = () => {
       <div style={{ background: '#ffcccc', padding: '0.5rem', margin: '1rem 0', borderRadius: 4 }}>
         <p><strong>🔄 Cache Buster:</strong> v{Date.now()}</p>
         <p><strong>📅 Build Time:</strong> {new Date().toISOString()}</p>
+        <p><strong>🚀 Last Deploy:</strong> 2025-05-24T11:39:00Z</p>
       </div>
 
       <p><strong>Environment:</strong></p>
