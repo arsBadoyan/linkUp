@@ -5,12 +5,13 @@ const BottomNavigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isEventsPage = location.pathname === '/events' || location.pathname.startsWith('/events');
+  const isEventsPage = location.pathname === '/events' || (location.pathname.startsWith('/events') && !location.pathname.startsWith('/events/my'));
+  const isMyEventsPage = location.pathname === '/events/my';
   const isProfilePage = location.pathname === '/profile';
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="flex justify-around items-center py-2 px-4">
+      <div className="flex justify-around items-center py-2 px-2">
         <button
           onClick={() => navigate('/events')}
           className={`flex flex-col items-center p-2 rounded-lg ${
@@ -18,7 +19,7 @@ const BottomNavigation: React.FC = () => {
           }`}
         >
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5"
             fill={isEventsPage ? 'currentColor' : 'none'}
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -34,13 +35,35 @@ const BottomNavigation: React.FC = () => {
         </button>
 
         <button
+          onClick={() => navigate('/events/my')}
+          className={`flex flex-col items-center p-2 rounded-lg ${
+            isMyEventsPage ? 'text-blue-600' : 'text-gray-500'
+          }`}
+        >
+          <svg
+            className="w-5 h-5"
+            fill={isMyEventsPage ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+            />
+          </svg>
+          <span className="text-xs mt-1">My Events</span>
+        </button>
+
+        <button
           onClick={() => navigate('/profile')}
           className={`flex flex-col items-center p-2 rounded-lg ${
             isProfilePage ? 'text-blue-600' : 'text-gray-500'
           }`}
         >
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5"
             fill={isProfilePage ? 'currentColor' : 'none'}
             stroke="currentColor"
             viewBox="0 0 24 24"

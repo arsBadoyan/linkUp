@@ -14,6 +14,7 @@ import EditEventPage from './pages/EditEventPage';
 import ProfilePage from './pages/ProfilePage';
 import AuthPage from './pages/AuthPage';
 import EventResponsesPage from './pages/EventResponsesPage';
+import MyEventsPage from './pages/MyEventsPage';
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -54,8 +55,8 @@ const AppContent: React.FC = () => {
   return (
     <EventsProvider>
       <div className="bg-gray-100 min-h-screen pb-16">
-        {/* Debug Panel - показываем только если в URL есть ?debug=true */}
-        {window.location.search.includes('debug=true') && <DebugPanel />}
+        {/* Debug Panel - show only if URL contains ?debug=true */}
+        {(window.location.search.includes('debug=true') || window.location.href.includes('debug=true')) && <DebugPanel />}
         
         <Routes>
           <Route path="/auth" element={user ? <Navigate to="/events" /> : <AuthPage />} />
@@ -63,6 +64,12 @@ const AppContent: React.FC = () => {
           <Route path="/events" element={
             <ProtectedRoute>
               <EventsPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/events/my" element={
+            <ProtectedRoute>
+              <MyEventsPage />
             </ProtectedRoute>
           } />
           

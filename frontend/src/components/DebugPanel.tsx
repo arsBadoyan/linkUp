@@ -12,7 +12,7 @@ const DebugPanel: React.FC = () => {
 
   // API URL logic (same as in contexts)
   const getApiUrl = () => {
-    // Проверяем несколько признаков production окружения
+    // Check multiple signs of production environment
     const isProduction = import.meta.env.PROD || 
                         import.meta.env.MODE === 'production' ||
                         window.location.protocol === 'https:' ||
@@ -23,9 +23,9 @@ const DebugPanel: React.FC = () => {
     }
     
     try {
-      return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      return import.meta.env.VITE_API_URL || 'http://localhost:8001';
     } catch (e) {
-      return 'http://localhost:8000';
+              return 'http://localhost:8001';
     }
   };
 

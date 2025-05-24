@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import datetime
-from uuid import UUID
 
 class UserBase(BaseModel):
     name: str
@@ -17,13 +16,13 @@ class UserUpdate(UserBase):
     name: Optional[str] = None
     
 class UserResponse(UserBase):
-    id: UUID
+    id: str
     telegram_id: int
     created_at: datetime
     updated_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class EventBase(BaseModel):
     title: str
@@ -45,17 +44,17 @@ class EventUpdate(BaseModel):
     type: Optional[str] = None
 
 class EventResponse(EventBase):
-    id: UUID
-    creator_id: UUID
+    id: str
+    creator_id: str
     created_at: datetime
     updated_at: datetime
     creator: Optional[UserResponse] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class EventResponseBase(BaseModel):
-    event_id: UUID
+    event_id: str
     status: str = "pending"
 
 class EventResponseCreate(EventResponseBase):
@@ -65,27 +64,27 @@ class EventResponseUpdate(BaseModel):
     status: str
 
 class EventResponseOut(EventResponseBase):
-    id: UUID
-    user_id: UUID
+    id: str
+    user_id: str
     responded_at: datetime
     user: Optional[UserResponse] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class BadgeBase(BaseModel):
-    user_id: UUID
+    user_id: str
     badge_type: str
 
 class BadgeCreate(BadgeBase):
     pass
 
 class BadgeResponse(BadgeBase):
-    id: UUID
+    id: str
     awarded_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class TelegramAuth(BaseModel):
     id: int

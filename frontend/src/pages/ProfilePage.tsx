@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
+import DebugPanel from '../components/DebugPanel';
 
 const ProfilePage: React.FC = () => {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     bio: user?.bio || '',
@@ -42,10 +44,83 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto p-4">
       {/* Header with back button */}
-      <div className="flex items-center mb-6">
-        <BackButton to="/events" className="mr-4" />
-        <h1 className="text-2xl font-bold">Profile</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <BackButton to="/events" className="mr-4" />
+          <h1 className="text-2xl font-bold">Profile</h1>
+        </div>
+        <button
+          onClick={() => {
+            console.log('Debug button clicked, current showDebug:', showDebug);
+            setShowDebug(!showDebug);
+          }}
+          className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+        >
+          {showDebug ? 'Hide Debug' : 'Show Debug'}
+        </button>
       </div>
+
+      {/* Debug Panel */}
+      {showDebug && (
+        <div style={{ background: '#f0f0f0', padding: '1rem', margin: '1rem 0', border: '2px solid red' }}>
+          <p style={{ color: 'red', fontWeight: 'bold' }}>Debug panel should appear here: showDebug = {String(showDebug)}</p>
+          <p>User ID: {user?.id}</p>
+          <p>User Name: {user?.name}</p>
+          <p>API URL: {import.meta.env.VITE_API_URL || 'http://localhost:8000'}</p>
+          
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('http://localhost:8001/users/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData: '', createNewUser: true })
+                  });
+                  const newUser = await response.json();
+                  console.log('Created new user:', newUser);
+                  
+                  // Update localStorage and reload page
+                  localStorage.setItem('user', JSON.stringify(newUser));
+                  window.location.reload();
+                } catch (error) {
+                  console.error('Error creating new user:', error);
+                }
+              }}
+              style={{ 
+                background: '#28a745', 
+                color: 'white', 
+                border: 'none', 
+                padding: '0.5rem 1rem', 
+                borderRadius: 4, 
+                cursor: 'pointer',
+                marginRight: '0.5rem'
+              }}
+            >
+              🔄 Create New Test User
+            </button>
+            
+            <button
+              onClick={() => {
+                localStorage.clear();
+                window.location.reload();
+              }}
+              style={{ 
+                background: '#dc3545', 
+                color: 'white', 
+                border: 'none', 
+                padding: '0.5rem 1rem', 
+                borderRadius: 4, 
+                cursor: 'pointer'
+              }}
+            >
+              🗑️ Clear & Restart
+            </button>
+          </div>
+          
+          <DebugPanel />
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-md p-6">
         {editing ? (

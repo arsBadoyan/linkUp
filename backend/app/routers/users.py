@@ -159,23 +159,48 @@ async def authenticate_user(request: Request, db: Session = Depends(get_db)):
         logger.info(f"Authentication request. DEBUG_MODE: {DEBUG_MODE}, initData length: {len(init_data)}")
         logger.info(f"Received initData first 50 chars: {init_data[:50]}...")
         
-        # Если DEBUG_MODE включен, используем тестового пользователя
+        # Если DEBUG_MODE включен, создаем уникального тестового пользователя
         if DEBUG_MODE:
-            logger.info("DEBUG_MODE is True, returning test user")
-            test_user = db.query(User).filter(User.telegram_id == 12345).first()
+            logger.info("DEBUG_MODE is True, checking for or creating unique test user")
             
-            if not test_user:
-                test_user = User(
-                    telegram_id=12345,
-                    name="Test User",
+            # Проверяем есть ли параметр для создания нового пользователя
+            create_new = body.get('createNewUser', False)
+            
+            if create_new:
+                # Создаем нового уникального пользователя
+                import time
+                import random
+                timestamp = int(time.time())
+                random_id = random.randint(1000, 9999)
+                unique_telegram_id = timestamp + random_id
+                
+                new_user = User(
+                    telegram_id=unique_telegram_id,
+                    name=f"Test User {random_id}",
                     avatar_url="https://via.placeholder.com/100",
-                    bio="This is a test user for development"
+                    bio=f"Test user created at {timestamp}"
                 )
-                db.add(test_user)
+                db.add(new_user)
                 db.commit()
-                db.refresh(test_user)
-            
-            return test_user
+                db.refresh(new_user)
+                logger.info(f"Created new test user with telegram_id: {unique_telegram_id}")
+                return new_user
+            else:
+                # Возвращаем существующего тестового пользователя
+                test_user = db.query(User).filter(User.telegram_id == 12345).first()
+                
+                if not test_user:
+                    test_user = User(
+                        telegram_id=12345,
+                        name="Test User (Default)",
+                        avatar_url="https://via.placeholder.com/100",
+                        bio="This is the default test user for development"
+                    )
+                    db.add(test_user)
+                    db.commit()
+                    db.refresh(test_user)
+                
+                return test_user
         
         # В production режиме обязательно создаем реального пользователя
         # Если initData пустой, создаем случайного пользователя

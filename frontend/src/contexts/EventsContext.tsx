@@ -23,22 +23,22 @@ interface EventsProviderProps {
 
 // API URL from environment variable with fallback
 const getApiUrl = () => {
-  // Проверяем несколько признаков production окружения
+  // Check multiple signs of production environment
   const isProduction = import.meta.env.PROD || 
                       import.meta.env.MODE === 'production' ||
                       window.location.protocol === 'https:' ||
                       window.location.hostname.includes('railway.app');
   
-  // В production используем правильный production backend URL
+  // In production use the correct production backend URL
   if (isProduction) {
     return 'https://linkup-backend-production.up.railway.app';
   }
   
-  // В dev режиме проверяем переменную окружения или используем localhost
+  // In dev mode check environment variable or use localhost
   try {
-    return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    return import.meta.env.VITE_API_URL || 'http://localhost:8001';
   } catch (e) {
-    return 'http://localhost:8000';
+          return 'http://localhost:8001';
   }
 };
 
@@ -68,7 +68,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
       // Build query parameters
       const params = new URLSearchParams();
       
-      // Добавляем фильтры, если они переданы
+      // Add filters if they are provided
       if (filters) {
         if (filters.type) params.append('event_type', filters.type);
         if (filters.location) params.append('location', filters.location);
@@ -78,29 +78,29 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
         }
       }
       
-      // Формируем строку запроса только если есть параметры
+      // Form query string only if there are parameters
       const queryString = params.toString();
       const queryParams = queryString ? `?${queryString}` : '';
       
-      console.log(`Fetching events with URL: ${API_URL}/events${queryParams}`);
+      console.log(`Fetching events with URL: ${API_URL}/events/${queryParams}`);
       
-      const response = await axios.get(`${API_URL}/events${queryParams}`);
+      const response = await axios.get(`${API_URL}/events/${queryParams}`);
       console.log('Events fetched successfully:', response.data);
       setEvents(response.data);
     } catch (error: any) {
       console.error('Fetch events error:', error);
-      // Выводим более подробную информацию об ошибке
+      // Output more detailed error information
       if (error.response) {
-        // Ответ получен, но со статусом ошибки
+        // Response received but with error status
         console.error('Error response data:', error.response.data);
         console.error('Error response status:', error.response.status);
         setError(`Failed to load events: ${error.response.status} ${JSON.stringify(error.response.data)}`);
       } else if (error.request) {
-        // Запрос отправлен, но ответ не получен
+        // Request sent but no response received
         console.error('Error request:', error.request);
         setError('Failed to load events: No response from server');
       } else {
-        // Что-то еще пошло не так
+        // Something else went wrong
         setError(`Failed to load events: ${error.message}`);
       }
     } finally {
@@ -140,7 +140,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      // Не передаем user_id, так как бэкенд его не требует
+      // Don't pass user_id as backend doesn't require it
       console.log(`Fetching event details: ${API_URL}/events/${id}`);
       const response = await axios.get(`${API_URL}/events/${id}`);
       console.log('Event details fetched successfully:', response.data);
@@ -169,7 +169,7 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      const response = await axios.post(`${API_URL}/events?user_id=${user.id}`, eventData);
+      const response = await axios.post(`${API_URL}/events/?user_id=${user.id}`, eventData);
       
       const newEvent = response.data;
       setEvents(prevEvents => [newEvent, ...prevEvents]);
@@ -221,10 +221,9 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      console.log(`Sending response to event: ${API_URL}/responses, event_id=${eventId}`);
-      const response = await axios.post(`${API_URL}/responses`, {
-        event_id: eventId,
-        user_id: user.id  // Здесь user_id необходим в теле запроса
+      console.log(`Sending response to event: ${API_URL}/responses?user_id=${user.id}, event_id=${eventId}`);
+      const response = await axios.post(`${API_URL}/responses?user_id=${user.id}`, {
+        event_id: eventId
       });
       console.log('Response sent successfully:', response.data);
       return response.data;
@@ -252,10 +251,9 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      console.log(`Updating response: ${API_URL}/responses/${responseId}`);
-      const response = await axios.put(`${API_URL}/responses/${responseId}`, {
-        ...data,
-        user_id: user.id  // user_id необходим в теле запроса
+      console.log(`Updating response: ${API_URL}/responses/${responseId}?user_id=${user.id}`);
+      const response = await axios.put(`${API_URL}/responses/${responseId}?user_id=${user.id}`, {
+        ...data
       });
       console.log('Response updated successfully:', response.data);
       return response.data;

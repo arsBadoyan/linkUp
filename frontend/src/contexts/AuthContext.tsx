@@ -18,22 +18,22 @@ interface AuthProviderProps {
 
 // API URL from environment variable with fallback
 const getApiUrl = () => {
-  // Проверяем несколько признаков production окружения
+  // Check multiple signs of production environment
   const isProduction = import.meta.env.PROD || 
                       import.meta.env.MODE === 'production' ||
                       window.location.protocol === 'https:' ||
                       window.location.hostname.includes('railway.app');
   
-  // В production используем правильный production backend URL
+  // In production use the correct production backend URL
   if (isProduction) {
     return 'https://linkup-backend-production.up.railway.app';
   }
   
-  // В dev режиме проверяем переменную окружения или используем localhost
+  // In dev mode check environment variable or use localhost
   try {
-    return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    return import.meta.env.VITE_API_URL || 'http://localhost:8001';
   } catch (e) {
-    return 'http://localhost:8000';
+          return 'http://localhost:8001';
   }
 };
 
