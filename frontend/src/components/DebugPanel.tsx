@@ -133,6 +133,8 @@ const DebugPanel: React.FC = () => {
           onClick={async () => {
             try {
               const apiUrl = getApiUrl();
+              console.log('🚀 Creating user with API URL:', apiUrl);
+              
               const response = await fetch(`${apiUrl}/users/auth`, {
                 method: 'POST',
                 headers: {
@@ -144,16 +146,24 @@ const DebugPanel: React.FC = () => {
                 })
               });
               
+              console.log('📡 Response status:', response.status);
+              console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+              
               if (response.ok) {
                 const newUser = await response.json();
-                console.log('Created new test user:', newUser);
+                console.log('✅ Created new test user:', newUser);
                 localStorage.setItem('user', JSON.stringify(newUser));
+                alert(`✅ User created: ${newUser.name} (ID: ${newUser.id})`);
                 window.location.reload();
               } else {
-                console.error('Failed to create new user');
+                const errorText = await response.text();
+                console.error('❌ Failed to create user. Status:', response.status);
+                console.error('❌ Error body:', errorText);
+                alert(`❌ Failed to create user: ${response.status} - ${errorText}`);
               }
-            } catch (error) {
-              console.error('Error creating new user:', error);
+            } catch (error: any) {
+              console.error('💥 Network error creating user:', error);
+              alert(`💥 Network error: ${error.message || String(error)}`);
             }
           }}
           style={{ 

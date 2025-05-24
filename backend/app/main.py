@@ -28,7 +28,14 @@ origins = [
     "https://linkup-frontend-production.up.railway.app",  # Correct production frontend URL
     "https://*.up.railway.app",  # All Railway apps
     "http://localhost:5173",  # Local development
+    "http://localhost:5174",  # Local development alternative port
+    "http://localhost:5175",  # Local development alternative port
+    "http://localhost:5176",  # Local development alternative port
     "http://127.0.0.1:5173",  # Local development alternative
+    "https://telegram.org",  # Telegram Web App
+    "https://*.telegram.org",  # Telegram subdomains
+    "https://web.telegram.org",  # Telegram Web App
+    "*",  # Временно разрешаем все для отладки Telegram Web App
 ]
 
 app.add_middleware(
