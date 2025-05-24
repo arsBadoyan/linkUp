@@ -169,15 +169,36 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
     setError(null);
     
     try {
+      console.log(`Creating event: ${API_URL}/events/?user_id=${user.id}`);
+      console.log('Event data:', eventData);
+      
       const response = await axios.post(`${API_URL}/events/?user_id=${user.id}`, eventData);
       
       const newEvent = response.data;
       setEvents(prevEvents => [newEvent, ...prevEvents]);
       setUserEvents(prevEvents => [newEvent, ...prevEvents]);
       return newEvent;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create event error:', error);
-      setError('Failed to create event. Please try again later.');
+      
+      // Более детальная обработка ошибок
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+        
+        if (error.response.status === 404) {
+          setError('API endpoint not found. Backend may be updating, please try again in a minute.');
+        } else if (error.response.status === 500) {
+          setError('Server error. Backend may be updating, please try again in a minute.');
+        } else {
+          setError(`Failed to create event: ${error.response.data?.detail || error.response.statusText}`);
+        }
+      } else if (error.request) {
+        setError('Failed to create event: No response from server. Please check your internet connection.');
+      } else {
+        setError(`Failed to create event: ${error.message}`);
+      }
+      
       throw error;
     } finally {
       setLoading(false);
