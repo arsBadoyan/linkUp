@@ -9,7 +9,7 @@ const DebugPanel: React.FC = () => {
 
   const telegramRaw = (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) || null;
   const initData = telegramRaw?.initData || 'Not available';
-
+ 
   // API URL logic (same as in contexts)
   const getApiUrl = () => {
     // Check multiple signs of production environment
@@ -40,6 +40,11 @@ const DebugPanel: React.FC = () => {
   return (
     <div style={{ background: '#f4f4f4', padding: '1rem', margin: '1rem 0', borderRadius: 8 }}>
       <h3>🔍 Debug Panel</h3>
+      
+      <div style={{ background: '#ffcccc', padding: '0.5rem', margin: '1rem 0', borderRadius: 4 }}>
+        <p><strong>🔄 Cache Buster:</strong> v{Date.now()}</p>
+        <p><strong>📅 Build Time:</strong> {new Date().toISOString()}</p>
+      </div>
 
       <p><strong>Environment:</strong></p>
       <pre style={{ background: '#fff', padding: 10, borderRadius: 4 }}>
@@ -94,10 +99,32 @@ const DebugPanel: React.FC = () => {
             border: 'none', 
             padding: '0.5rem 1rem', 
             borderRadius: 4, 
-            cursor: 'pointer'
+            cursor: 'pointer',
+            marginRight: '0.5rem'
           }}
         >
           🗑️ Clear Cache & Reload
+        </button>
+        
+        <button 
+          onClick={() => {
+            if (window.Telegram?.WebApp) {
+              window.Telegram.WebApp.close();
+              setTimeout(() => window.location.reload(), 1000);
+            } else {
+              window.location.reload();
+            }
+          }}
+          style={{ 
+            background: '#28a745', 
+            color: 'white', 
+            border: 'none', 
+            padding: '0.5rem 1rem', 
+            borderRadius: 4, 
+            cursor: 'pointer'
+          }}
+        >
+          🔄 Hard Refresh
         </button>
       </div>
     </div>

@@ -46,6 +46,12 @@ const AppContent: React.FC = () => {
     // Configure main button if needed
     safeMainButton.hide();
     
+    // Force cache refresh in Telegram Web App
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const version = Date.now();
+      console.log('🔄 Cache buster version:', version);
+    }
+    
     // Clean up on unmount
     return () => {
       safeMainButton.hide();
