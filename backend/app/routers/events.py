@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 from app.database import get_db
 from app.models.models import Event, User, EventResponse as EventResponseModel
 from app.schemas.schemas import EventCreate, EventResponse, EventUpdate
+import logging
 
 router = APIRouter(
     prefix="/events",
@@ -12,10 +13,15 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=EventResponse)
-def create_event(event_data: EventCreate, user_id: str, db: Session = Depends(get_db)):
+def create_event(event_data: EventCreate, user_id: str = Query(...), db: Session = Depends(get_db)):
+    logger = logging.getLogger(__name__)
+    logger.info(f"Creating event for user_id: {user_id}")
+    logger.info(f"Event data: {event_data}")
+    
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
+        logger.error(f"User not found: {user_id}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with id {user_id} not found"
@@ -71,7 +77,7 @@ def get_event(event_id: str, db: Session = Depends(get_db)):
     return event
 
 @router.put("/{event_id}", response_model=EventResponse)
-def update_event(event_id: str, event_data: EventUpdate, user_id: str, db: Session = Depends(get_db)):
+def update_event(event_id: str, event_data: EventUpdate, user_id: str = Query(...), db: Session = Depends(get_db)):
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(
@@ -99,7 +105,7 @@ def update_event(event_id: str, event_data: EventUpdate, user_id: str, db: Sessi
     return event
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(event_id: str, user_id: str, db: Session = Depends(get_db)):
+def delete_event(event_id: str, user_id: str = Query(...), db: Session = Depends(get_db)):
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(
